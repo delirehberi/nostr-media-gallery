@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill';
 import { decodeNostrToHex } from './nip19';
+import { extractNip05FromUrl, isNip05, resolveNip05 } from './nip05';
 import { fetchMediaUrls } from './relay';
 import { buildGalleryHtml } from './gallery';
 
@@ -11,13 +12,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   settingsLink.addEventListener('click', () => browser.runtime.openOptionsPage());
 
-  // Auto-detect npub/nprofile from active tab URL
+  // Auto-detect npub/nprofile or NIP-05 identifier from active tab URL
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   if (tab?.url) {
-    const match = tab.url.match(/(nprofile1|npub1)[a-z0-9]+/);
-    if (match) {
-      inputField.value = match[0];
+    const nostrMatch = tab.url.match(/(nprofile1|npub1)[a-z0-9]+/);
+    if (nostrMatch) {
+      inputField.value = nostrMatch[0];
       statusEl.innerText = 'Found address in URL!';
+    } else {
+      const nip05 = extractNip05FromUrl(tab.url);
+      if (nip05) {
+        inputField.value = nip05;
+        statusEl.innerText = 'Found NIP-05 address in URL!';
+      }
     }
   }
 
@@ -25,15 +32,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const input = inputField.value.trim();
     if (!input) return;
 
+    fetchBtn.disabled = true;
+
     let authorHex: string;
     try {
-      authorHex = decodeNostrToHex(input);
-    } catch {
-      statusEl.innerText = 'Error: Invalid Nostr address.';
+      if (isNip05(input)) {
+        statusEl.innerText = 'Resolving NIP-05…';
+        authorHex = await resolveNip05(input);
+      } else {
+        authorHex = decodeNostrToHex(input);
+      }
+    } catch (e) {
+      statusEl.innerText = `Error: ${e instanceof Error ? e.message : 'Invalid address.'}`;
+      fetchBtn.disabled = false;
       return;
     }
 
-    fetchBtn.disabled = true;
     statusEl.innerText = 'Querying relays…';
 
     const urls = await fetchMediaUrls(authorHex);

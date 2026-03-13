@@ -4,6 +4,7 @@
   "version": "2.0.0",
   "description": "Generate a media gallery from any Nostr user's posts. Visit a Nostr profile page and click the extension icon.",
   "permissions": ["tabs", "activeTab", "storage"],
+  "host_permissions": ["https://*/.well-known/nostr.json*"],
   "options_ui": {
     "page": "options.html",
     "open_in_tab": false
