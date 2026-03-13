@@ -1,15 +1,15 @@
-// Gallery HTML generation with inline lightbox
+// Gallery HTML generation — images open full-size in a new tab on click
 
-export function buildGalleryHtml(authorHex: string, urls: Set<string>): string {
-  const items = [...urls];
-  const itemsJson = JSON.stringify(items);
-
-  const mediaItems = items.map((url, i) => {
+export function buildGalleryHtml(authorHex: string, mediaMap: Map<string, string>): string {
+  const mediaItems = [...mediaMap.entries()].map(([url, caption]) => {
     const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
+    const captionHtml = caption
+      ? `<div class="caption">${escapeHtml(caption)}</div>`
+      : '';
     if (isVideo) {
-      return `<div class="item"><video controls src="${escapeHtml(url)}"></video><div class="label">${escapeHtml(url)}</div></div>`;
+      return `<div class="item"><video controls src="${escapeHtml(url)}"></video>${captionHtml}</div>`;
     }
-    return `<div class="item"><img src="${escapeHtml(url)}" alt="" loading="lazy" data-index="${i}" onclick="openLightbox(${i})"><div class="label">${escapeHtml(url)}</div></div>`;
+    return `<div class="item"><a href="${escapeHtml(url)}" target="_blank" rel="noopener"><img src="${escapeHtml(url)}" alt="" loading="lazy"></a>${captionHtml}</div>`;
   }).join('\n');
 
   return `<!DOCTYPE html>
@@ -37,109 +37,28 @@ export function buildGalleryHtml(authorHex: string, urls: Set<string>): string {
       border-radius: 12px;
       overflow: hidden;
     }
+    a { display: block; }
     img, video {
       width: 100%;
       display: block;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #222;
     }
-    img { cursor: zoom-in; }
-    .label {
-      font-size: 11px;
-      padding: 10px;
-      color: #666;
-      word-break: break-all;
+    a img { cursor: zoom-in; transition: opacity 0.15s; }
+    a:hover img { opacity: 0.85; }
+    .caption {
+      font-size: 13px;
+      padding: 10px 12px;
+      color: #ccc;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
-
-    /* Lightbox */
-    #lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.92);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    #lightbox.open { display: flex; }
-    #lightbox img {
-      max-width: 90vw;
-      max-height: 90vh;
-      object-fit: contain;
-      border-radius: 4px;
-      cursor: default;
-    }
-    #lb-close {
-      position: fixed;
-      top: 16px;
-      right: 20px;
-      font-size: 36px;
-      color: #fff;
-      cursor: pointer;
-      line-height: 1;
-      user-select: none;
-    }
-    #lb-prev, #lb-next {
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 48px;
-      color: #fff;
-      cursor: pointer;
-      user-select: none;
-      padding: 0 16px;
-      opacity: 0.7;
-    }
-    #lb-prev:hover, #lb-next:hover { opacity: 1; }
-    #lb-prev { left: 0; }
-    #lb-next { right: 0; }
   </style>
 </head>
 <body>
   <div class="grid">
 ${mediaItems}
   </div>
-
-  <div id="lightbox" role="dialog" aria-modal="true">
-    <span id="lb-close" onclick="closeLightbox()" title="Close">&#x2715;</span>
-    <span id="lb-prev" onclick="moveLightbox(-1)" title="Previous">&#x2039;</span>
-    <img id="lb-img" src="" alt="">
-    <span id="lb-next" onclick="moveLightbox(1)" title="Next">&#x203A;</span>
-  </div>
-
-  <script>
-    const allUrls = ${itemsJson};
-    const imageUrls = allUrls.filter(u => !/\\.(mp4|webm|ogg|mov)$/i.test(u));
-    let currentIndex = 0;
-
-    function openLightbox(gridIndex) {
-      const url = allUrls[gridIndex];
-      currentIndex = imageUrls.indexOf(url);
-      document.getElementById('lb-img').src = url;
-      document.getElementById('lightbox').classList.add('open');
-    }
-
-    function closeLightbox() {
-      document.getElementById('lightbox').classList.remove('open');
-      document.getElementById('lb-img').src = '';
-    }
-
-    function moveLightbox(dir) {
-      currentIndex = (currentIndex + dir + imageUrls.length) % imageUrls.length;
-      document.getElementById('lb-img').src = imageUrls[currentIndex];
-    }
-
-    document.getElementById('lightbox').addEventListener('click', function(e) {
-      if (e.target === this) closeLightbox();
-    });
-
-    document.addEventListener('keydown', function(e) {
-      const lb = document.getElementById('lightbox');
-      if (!lb.classList.contains('open')) return;
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowLeft') moveLightbox(-1);
-      if (e.key === 'ArrowRight') moveLightbox(1);
-    });
-  </script>
 </body>
 </html>`;
 }

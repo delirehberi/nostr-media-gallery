@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const html = buildGalleryHtml(authorHex, urls);
+    const html = buildGalleryHtml(authorHex, urls); // urls is Map<string, string>
     const blob = new Blob([html], { type: 'text/html' });
     window.open(URL.createObjectURL(blob), '_blank');
     statusEl.innerText = `Found ${urls.size} items!`;

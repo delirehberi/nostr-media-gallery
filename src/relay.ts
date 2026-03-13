@@ -28,6 +28,12 @@ interface NostrEvent {
   tags?: NostrTag[];
 }
 
+// Returns the note content with all media URLs stripped out (clean caption text)
+function extractCaption(event: NostrEvent): string {
+  const raw = (event.content ?? '').trim();
+  return raw.replace(MEDIA_PATTERN, '').replace(/\s{2,}/g, ' ').trim();
+}
+
 function extractUrlsFromEvent(event: NostrEvent): string[] {
   const urls: string[] = [];
 
@@ -68,8 +74,9 @@ async function getRelays(): Promise<string[]> {
   }
 }
 
-export async function fetchMediaUrls(authorHex: string): Promise<Set<string>> {
-  const foundUrls = new Set<string>();
+// Returns Map<url, caption> — caption is the note text with media URLs stripped
+export async function fetchMediaUrls(authorHex: string): Promise<Map<string, string>> {
+  const foundUrls = new Map<string, string>();
   const relays = await getRelays();
 
   const promises = relays.map(relayUrl => {
@@ -86,7 +93,10 @@ export async function fetchMediaUrls(authorHex: string): Promise<Set<string>> {
           const data = JSON.parse(msg.data) as unknown[];
           if (data[0] === 'EVENT') {
             const event = data[2] as NostrEvent;
-            for (const url of extractUrlsFromEvent(event)) foundUrls.add(url);
+            const caption = extractCaption(event);
+            for (const url of extractUrlsFromEvent(event)) {
+              if (!foundUrls.has(url)) foundUrls.set(url, caption);
+            }
           }
           if (data[0] === 'EOSE') {
             clearTimeout(timer);
