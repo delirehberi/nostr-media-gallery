@@ -1,0 +1,19 @@
+{
+  "name": "nostr-gallery-ext",
+  "version": "2.0.0",
+  "description": "Browser extension that generates a media gallery from any Nostr user's posts",
+  "private": true,
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "dev": "tsx scripts/build.ts --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/webextension-polyfill": "^0.10.7",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "webextension-polyfill": "^0.12.0"
+  }
+}

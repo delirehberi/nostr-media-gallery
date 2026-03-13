@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Nostr Media Gallery",
+  "version": "2.0.0",
+  "description": "Generate a media gallery from any Nostr user's posts. Visit a Nostr profile page and click the extension icon.",
+  "permissions": ["tabs", "activeTab", "storage"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon-48.svg",
+      "128": "icons/icon-128.svg"
+    }
+  },
+  "icons": {
+    "48": "icons/icon-48.svg",
+    "128": "icons/icon-128.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "nostr-gallery@extension",
+      "strict_min_version": "109.0"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <rect width="48" height="48" rx="10" fill="#1a1a2e"/>
+  <!-- Grid of image tiles -->
+  <rect x="6" y="6" width="16" height="16" rx="3" fill="#4a90e2"/>
+  <rect x="26" y="6" width="16" height="16" rx="3" fill="#7b68ee"/>
+  <rect x="6" y="26" width="16" height="16" rx="3" fill="#7b68ee"/>
+  <rect x="26" y="26" width="16" height="16" rx="3" fill="#4a90e2"/>
+  <!-- Lightning bolt (Nostr symbol) -->
+  <polygon points="24,10 20,22 24,22 20,38 28,22 24,22 28,10" fill="white" opacity="0.9"/>
+</svg>
